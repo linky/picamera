@@ -14,17 +14,17 @@ VIDEO_LENGTH = 15 # min
 
 def getUsbDrive():
 	partitionsFile = open("/proc/partitions")
-	lines = partitionsFile.readlines()[2:]#Skips the header lines
+	lines = partitionsFile.readlines()[2:]
 	for line in lines:
 		words = [x.strip() for x in line.split()]
-		minorNumber = int(words[1])
-		deviceName = words[3]
-		if minorNumber % 16 == 0:
-			path = "/sys/class/block/" + deviceName
+		minor_number = int(words[1])
+		device_name = words[3]
+		if minor_number % 16 == 0:
+			path = "/sys/class/block/" + device_name
 		if os.path.islink(path):
 			if os.path.realpath(path).find("/usb") > 0:
-				print('/dev/' + deviceName + '1')
-				return '/dev/' + deviceName + '1'
+				print('/dev/' + device_name + '1')
+				return '/dev/' + device_name + '1'
 	return None
 
 def mountDrive():
@@ -43,7 +43,7 @@ def genNewVideoPath():
 	return str(max_index + 1) + '.' + FORMAT
 
 def getOldVideoPath():
-	files = glob.glob(VIDEO_DIR + '/*.mp4') # * means all if need specific format then *.csv
+	files = glob.glob(VIDEO_DIR + '/*.mp4')
 	oldest_path = min(files, key=os.path.getctime)
 	oldest_filename = os.path.basename(oldest_path)
 
