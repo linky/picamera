@@ -10,7 +10,7 @@ VIDEO_DIR = '/mnt'
 FORMAT = 'mp4'
 RESOLUTION = (640, 360)
 FPS = 24
-VIDEO_LENGTH = 15 # min
+VIDEO_LENGTH = 1 #15 # min
 
 def getUsbDrive():
 	partitionsFile = open("/proc/partitions")
@@ -44,6 +44,8 @@ def genNewVideoPath():
 
 def getOldVideoPath():
 	files = glob.glob(VIDEO_DIR + '/*.mp4')
+	if not files:
+		return None
 	oldest_path = min(files, key=os.path.getctime)
 	oldest_filename = os.path.basename(oldest_path)
 
@@ -54,6 +56,7 @@ def getDriveUsedRatio():
 	statvfs = os.statvfs(VIDEO_DIR)
 	free = statvfs.f_frsize * statvfs.f_bavail
 	used = statvfs.f_frsize * statvfs.f_blocks - free
+	print('free %d used %d' % (free, used))
 
 	return free/used
 
@@ -63,16 +66,16 @@ def writeVideo():
 	camera.framerate = FPS
 
 	# write 15-minutes parts of stream
-	for filename in camera.record_sequence(['%d.' + FORMAT % (part + 1) for part in range(999)]):
+	for filename in camera.record_sequence([str(VIDEO_DIR + '/%d.' + FORMAT) % (part + 1) for part in range(999)]):
 		print('start writing %s' % filename)
 		# check if avaliable space on sdcard < 80%
 		used_ratio = getDriveUsedRatio()
-		print('sdcard space available: %f%%' % used_ratio)
-		while used_ratio > 0.8: 
+		print('sdcard used/free space ratio: %f' % used_ratio)
+		while used_ratio < 0.8: 
 			old_video = getOldVideoPath()
 			os.remove(old_video)
 			used_ratio = getDriveUsedRatio()
-
+		print('wait recording')
 		camera.wait_recording(VIDEO_LENGTH*60) # 15 min
 
 def setAutostart():
@@ -99,9 +102,9 @@ if len(sys.argv) == 2 and sys.argv[1] == '-a':
 # check sdcard
 while True:
 	print('check sdcard')
-	if not getUsbDrive():
-		os.sleep(3)
-		continue
+	if getUsbDrive():
+		break;
+	os.sleep(3)
 
 # processing
 try:
@@ -109,7 +112,7 @@ try:
 
 	writeVideo();
 
-except Exception as e:
-	print(e)
+#except Exception as e:
+#	print(e)
 finally:
 	umountDrive()
