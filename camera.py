@@ -82,18 +82,19 @@ def writeVideo():
 		print('wait recording')
 		camera.wait_recording(VIDEO_LENGTH*60) # 15 min
 
+
 def setAutostart():
 	self_path = os.path.realpath(__file__)
 	print('set autostart %s' % self_path)
 	with open('/etc/rc.local') as fin:
-		with open('/etc/rc.local.tmp') as fout:
-			while line in fin:
-				if line == 'exit 0':
-					fout.write(self_path + ' &\n')
+		with open('/etc/rc.local.tmp', 'w') as fout:
+			for line in fin:
+				if 'exit 0' in line:
+					fout.write('python3 ' + self_path + ' &\n')
 				fout.write(line)
 
 	os.rename('/etc/rc.local', '/etc/rc.local.old')
-	os.rename('/etc/rc.loca.tmp', '/etc/rc.local')
+	os.rename('/etc/rc.local.tmp', '/etc/rc.local')
 
 
 #######################################################################
@@ -102,6 +103,7 @@ def setAutostart():
 if len(sys.argv) == 2 and sys.argv[1] == '-a':
 	print('set autostart')
 	setAutostart()
+	sys.exit(0)
 
 # check sdcard
 while True:
