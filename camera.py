@@ -5,6 +5,7 @@ import sh
 import sys
 import glob
 import picamera
+from time import sleep
 
 VIDEO_DIR = '/mnt/'
 FORMAT = 'mp4'
@@ -50,7 +51,7 @@ def getOldVideoPath():
 	oldest_path = min(files, key=os.path.getctime)
 	oldest_filename = os.path.basename(oldest_path)
 
-	return oldest_filename
+	return VIDEO_DIR + oldest_filename
 
 
 def getDriveUsedRatio():
@@ -75,6 +76,7 @@ def writeVideo():
 		print('sdcard used space: %.1f%%' % used_ratio)
 		while used_ratio > 80: 
 			old_video = getOldVideoPath()
+			print('removing old video file %s' % old_video)
 			os.remove(old_video)
 			used_ratio = getDriveUsedRatio()
 		print('wait recording')
@@ -103,10 +105,10 @@ if len(sys.argv) == 2 and sys.argv[1] == '-a':
 
 # check sdcard
 while True:
-	print('check sdcard')
+	print('waiting USB-drive')
 	if getUsbDrive():
 		break;
-	os.sleep(3)
+	sleep(3)
 
 # processing
 try:
