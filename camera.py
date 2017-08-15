@@ -6,11 +6,11 @@ import sys
 import glob
 import picamera
 
-VIDEO_DIR = '/mnt'
+VIDEO_DIR = '/mnt/'
 FORMAT = 'mp4'
 RESOLUTION = (640, 360)
 FPS = 24
-VIDEO_LENGTH = 1 #15 # min
+VIDEO_LENGTH = 15 # min
 
 def getUsbDrive():
 	partitionsFile = open("/proc/partitions")
@@ -37,10 +37,11 @@ def umountDrive():
 	sh.umount(VIDEO_DIR)
 
 def genNewVideoPath():
-	files = list(map(os.path.basename, glob.glob(VIDEO_DIR + '/*.' + FORMAT)))
+	files = list(map(os.path.basename, glob.glob(VIDEO_DIR + '*.' + FORMAT)))
 	max_index = max([ int(f.split('.' + FORMAT)[0]) for f in files ])
 
-	return str(max_index + 1) + '.' + FORMAT
+	#return str(max_index + 1) + '.' + FORMAT
+	return max_index + 1
 
 def getOldVideoPath():
 	files = glob.glob(VIDEO_DIR + '/*.mp4')
@@ -66,11 +67,11 @@ def writeVideo():
 	camera.framerate = FPS
 
 	# write 15-minutes parts of stream
-	for filename in camera.record_sequence([str(VIDEO_DIR + '/%d.' + FORMAT) % (part + 1) for part in range(999)]):
+	for filename in camera.record_sequence([VIDEO_DIR + str(genNewVideoPath() + part) + '.' + FORMAT for part in range(999)], format='h264', quality=23):
 		print('start writing %s' % filename)
 		# check if avaliable space on sdcard < 80%
 		used_ratio = getDriveUsedRatio()
-		print('sdcard used/free space ratio: %f' % used_ratio)
+		print('sdcard free/used space ratio: %f' % used_ratio)
 		while used_ratio < 0.8: 
 			old_video = getOldVideoPath()
 			os.remove(old_video)
