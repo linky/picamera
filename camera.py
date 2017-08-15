@@ -57,9 +57,10 @@ def getDriveUsedRatio():
 	statvfs = os.statvfs(VIDEO_DIR)
 	free = statvfs.f_frsize * statvfs.f_bavail
 	used = statvfs.f_frsize * statvfs.f_blocks - free
+	all = free + used
 	print('free %d used %d' % (free, used))
 
-	return free/used
+	return (all - free)/all*100.0
 
 def writeVideo():
 	camera = picamera.PiCamera()
@@ -71,8 +72,8 @@ def writeVideo():
 		print('start writing %s' % filename)
 		# check if avaliable space on sdcard < 80%
 		used_ratio = getDriveUsedRatio()
-		print('sdcard free/used space ratio: %f' % used_ratio)
-		while used_ratio < 0.8: 
+		print('sdcard used space: %.1f%%' % used_ratio)
+		while used_ratio > 80: 
 			old_video = getOldVideoPath()
 			os.remove(old_video)
 			used_ratio = getDriveUsedRatio()
