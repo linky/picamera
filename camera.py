@@ -85,17 +85,8 @@ def writeVideo():
 
 def setAutostart():
 	self_path = os.path.realpath(__file__)
-	print('set autostart %s' % self_path)
-	with open('/etc/rc.local') as fin:
-		with open('/etc/rc.local.tmp', 'w') as fout:
-			for line in fin:
-				if 'exit 0' in line:
-					fout.write('python3 ' + self_path + ' &\n')
-				fout.write(line)
-
-	os.rename('/etc/rc.local', '/etc/rc.local.old')
-	os.rename('/etc/rc.local.tmp', '/etc/rc.local')
-
+	os.system('cp %s /etc/init.d' % self_path)
+	os.system('update-rc.d /etc/init.d/camera.py defaults')
 
 #######################################################################
 
