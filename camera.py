@@ -70,17 +70,27 @@ def writeVideo():
 
 	# write 15-minutes parts of stream
 	for filename in camera.record_sequence([VIDEO_DIR + str(genNewVideoPath() + part) + '.' + FORMAT for part in range(999)], format='h264', quality=23):
-		print('start writing %s' % filename)
-		# check if avaliable space on sdcard < 80%
-		used_ratio = getDriveUsedRatio()
-		print('sdcard used space: %.1f%%' % used_ratio)
-		while used_ratio > 80: 
-			old_video = getOldVideoPath()
-			print('removing old video file %s' % old_video)
-			os.remove(old_video)
+		try:
+			print('start writing %s' % filename)
+			# check if avaliable space on sdcard < 80%
 			used_ratio = getDriveUsedRatio()
-		print('wait recording')
-		camera.wait_recording(VIDEO_LENGTH*60) # 15 min
+			print('sdcard used space: %.1f%%' % used_ratio)
+			while used_ratio > 80: 
+				old_video = getOldVideoPath()
+				print('removing old video file %s' % old_video)
+				os.remove(old_video)
+				used_ratio = getDriveUsedRatio()
+			print('wait recording')
+			camera.wait_recording(VIDEO_LENGTH*60) # 15 min
+		except Exception as e:
+			print(e)
+			umountDrive()
+			while True:
+				print('waiting USB-drive')
+				if getUsbDrive():
+					break;
+				sleep(3)
+			mountDrive()
 
 
 def setAutostart():
