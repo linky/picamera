@@ -86,7 +86,7 @@ def writeVideo():
 def setAutostart():
 	self_path = os.path.realpath(__file__)
 	os.system('cp %s /etc/init.d' % self_path)
-	os.system('update-rc.d /etc/init.d/camera.py defaults')
+	os.system('update-rc.d camera.py defaults')
 
 #######################################################################
 
