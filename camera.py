@@ -4,7 +4,7 @@ import os
 import sh
 import sys
 import glob
-import picamera
+#import picamera
 from time import sleep
 
 VIDEO_DIR = '/mnt/'
@@ -64,33 +64,36 @@ def getDriveUsedRatio():
 	return (all - free)/all*100.0
 
 def writeVideo():
-	camera = picamera.PiCamera()
-	camera.resolution = RESOLUTION
-	camera.framerate = FPS
+#   camera = picamera.PiCamera()
+#   camera.resolution = RESOLUTION
+#   camera.framerate = FPS
 
-	# write 15-minutes parts of stream
-	for filename in camera.record_sequence([VIDEO_DIR + str(genNewVideoPath() + part) + '.' + FORMAT for part in range(999)], format='h264', quality=23):
-		try:
-			print('start writing %s' % filename)
-			# check if avaliable space on sdcard < 80%
-			used_ratio = getDriveUsedRatio()
-			print('sdcard used space: %.1f%%' % used_ratio)
-			while used_ratio > 80: 
-				old_video = getOldVideoPath()
-				print('removing old video file %s' % old_video)
-				os.remove(old_video)
-				used_ratio = getDriveUsedRatio()
-			print('wait recording')
-			camera.wait_recording(VIDEO_LENGTH*60) # 15 min
-		except Exception as e:
-			print(e)
-			umountDrive()
-			while True:
-				print('waiting USB-drive')
-				if getUsbDrive():
-					break;
-				sleep(3)
-			mountDrive()
+    # write 15-minutes parts of stream
+    #for filename in camera.record_sequence([VIDEO_DIR + str(genNewVideoPath() + part) + '.' + FORMAT for part in range(999)], format='h264', quality=23):
+    for i in range(10000000):
+        try:
+            print('start writing %d' % i)
+            # check if avaliable space on sdcard < 80%
+            used_ratio = getDriveUsedRatio()
+            print('sdcard used space: %.1f%%' % used_ratio)
+            while used_ratio > 80:
+                old_video = getOldVideoPath()
+                print('removing old video file %s' % old_video)
+                os.remove(old_video)
+                used_ratio = getDriveUsedRatio()
+            print('wait recording')
+            open('/mnt/' + str(i) + '.mp4', 'w').truncate(1024*1024)
+            #camera.wait_recording(VIDEO_LENGTH*60) # 15 min
+        except Exception as e:
+            print(e)
+            umountDrive()
+            while True:
+                print('waiting USB-drive')
+                if getUsbDrive():
+                    break;
+                sleep(3)
+            mountDrive()
+
 
 
 def setAutostart():
