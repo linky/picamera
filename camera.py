@@ -82,7 +82,11 @@ def writeVideo():
                 os.remove(old_video)
                 used_ratio = getDriveUsedRatio()
             print('wait recording')
-            open('/mnt/' + str(i) + '.mp4', 'w').truncate(1024*1024)
+            f = open('/mnt/' + str(i) + '.mp4', 'w')
+            f.truncate(1024*1024)
+            for j in range(1000):
+                f.write('asdsa' + str(j))
+			
             #camera.wait_recording(VIDEO_LENGTH*60) # 15 min
         except Exception as e:
             print(e)
@@ -122,7 +126,9 @@ try:
 
 	writeVideo();
 
-#except Exception as e:
-#	print(e)
+except Exception as e:
+	print(e)
+	print('but write video')
+	writeVideo();
 finally:
 	umountDrive()
