@@ -39,9 +39,10 @@ def umountDrive():
 
 def genNewVideoPath():
 	files = list(map(os.path.basename, glob.glob(VIDEO_DIR + '*.' + FORMAT)))
+	if not files:
+		return 1
 	max_index = max([ int(f.split('.' + FORMAT)[0]) for f in files ])
 
-	#return str(max_index + 1) + '.' + FORMAT
 	return max_index + 1
 
 def getOldVideoPath():
@@ -68,8 +69,9 @@ def writeVideo():
 	camera.resolution = RESOLUTION
 	camera.framerate = FPS
 
+	print('start writing!')
 	# write 15-minutes parts of stream
-	for filename in camera.record_sequence([VIDEO_DIR + str(genNewVideoPath() + part) + '.' + FORMAT for part in range(999)], format='h264', quality=23):
+	for filename in camera.record_sequence([VIDEO_DIR + str(genNewVideoPath() + part) + '.' + FORMAT for part in range(9999)], format='h264', quality=23):
 		try:
 			print('start writing %s' % filename)
 			# check if avaliable space on sdcard < 80%
@@ -80,6 +82,7 @@ def writeVideo():
 				print('removing old video file %s' % old_video)
 				os.remove(old_video)
 				used_ratio = getDriveUsedRatio()
+				time.sleep(1)
 			print('wait recording')
 			camera.wait_recording(VIDEO_LENGTH*60) # 15 min
 		except Exception as e:
@@ -94,17 +97,24 @@ def writeVideo():
 
 
 def setAutostart():
-	self_path = os.path.realpath(__file__)
+	self_path = 'camerad.sh' #os.path.realpath(__file__)
 	os.system('cp %s /etc/init.d' % self_path)
-	os.system('update-rc.d camera.py defaults')
+	os.system('update-rc.d ' + self_path + ' defaults')
 
 #######################################################################
 
+
 # autostart
-if len(sys.argv) == 2 and sys.argv[1] == '-a':
-	print('set autostart')
-	setAutostart()
-	sys.exit(0)
+if len(sys.argv) == 2:
+	if sys.argv[1] == '-a':
+		print('set autostart')
+		setAutostart()
+		sys.exit(0)
+	else:
+		sleep(5)
+		logf = open('/home/pi/camera.log', 'a')
+		sys.stdout = logf
+		sys.stderr = logf
 
 # check sdcard
 while True:
@@ -115,11 +125,14 @@ while True:
 
 # processing
 try:
-	mountDrive()
+	if not os.path.ismount(VIDEO_DIR):
+		mountDrive()
 
 	writeVideo();
 
-#except Exception as e:
-#	print(e)
+except Exception as e:
+	print(e)
+	#print('but write video')
+	#writeVideo();
 finally:
 	umountDrive()
