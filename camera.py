@@ -35,7 +35,10 @@ def mountDrive():
 
 def umountDrive():
 	print('umount %s' % VIDEO_DIR)
-	sh.umount(VIDEO_DIR)
+	try:
+		sh.umount(VIDEO_DIR)
+	except Exception:
+		pass
 
 def genNewVideoPath():
 	files = list(map(os.path.basename, glob.glob(VIDEO_DIR + '*.' + FORMAT)))
@@ -83,9 +86,9 @@ def writeVideo():
                 used_ratio = getDriveUsedRatio()
             print('wait recording')
             f = open('/mnt/' + str(i) + '.mp4', 'w')
-            f.truncate(1024*1024)
-            for j in range(1000):
+            for j in range(100000):
                 f.write('asdsa' + str(j))
+            sleep(1)
 			
             #camera.wait_recording(VIDEO_LENGTH*60) # 15 min
         except Exception as e:
