@@ -29,13 +29,19 @@ def getUsbDrive():
 	return None
 
 def mountDrive():
-	drivePath = getUsbDrive()
-	print('mount %s' % drivePath)
-	sh.mount(drivePath, VIDEO_DIR)
+	try:
+		drivePath = getUsbDrive()
+		print('mount %s' % drivePath)
+		sh.mount(drivePath, VIDEO_DIR)
+	except:
+		pass
 
 def umountDrive():
 	print('umount %s' % VIDEO_DIR)
-	sh.umount(VIDEO_DIR)
+	try:
+		sh.umount(VIDEO_DIR)
+	except:
+		pass
 
 def genNewVideoPath():
 	files = list(map(os.path.basename, glob.glob(VIDEO_DIR + '*.' + FORMAT)))
