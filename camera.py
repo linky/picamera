@@ -32,7 +32,10 @@ def mountDrive():
 	try:
 		drivePath = getUsbDrive()
 		print('mount %s' % drivePath)
+		os.system('sudo fsck -Af -M')
+		sleep(1)
 		sh.mount(drivePath, VIDEO_DIR)
+		os.system('mount -o remount,rw ' + VIDEO_DIR)
 	except:
 		pass
 
