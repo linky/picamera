@@ -1,4 +1,4 @@
-Raspberry Pi 3 application for writing videos on SD-card
+Raspberry Pi 3 video recorder
 
 How to use:
 * `pip3 install picamera`
